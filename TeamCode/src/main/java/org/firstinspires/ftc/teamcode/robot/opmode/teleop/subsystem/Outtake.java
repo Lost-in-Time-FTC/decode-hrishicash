@@ -44,21 +44,17 @@ public class Outtake {
             hardware.outtakeR.setPower(0);
         }
 
-        //for outtakeFeeder
-
-        //go backward (hopefully unneeded
-        /*
-        if ((currentGamepad2.left_trigger>0.8) && (previousGamepad2.left_trigger<0.8)) {
-            feederToggle = !feederToggle;
+        if (gamepad2.right_trigger>0.8) {
+            hardware.rotateOuttake(1); //I want this to rotate right, MUST TEST
+        } else if (gamepad2.left_trigger>0.8) {
+            hardware.rotateOuttake(-1);
+        } else {
+            hardware.rotateOuttake(0);
         }
 
-        if (feederToggle) {
-            hardware.intake.setPower(1);
-        } else {
-            hardware.intake.setPower(0);
-        }*/
-
-        if ((gamepad2.right_trigger>0.8 && hardware.outtakeL.getPower()<0.2) || (gamepad2.right_trigger>0.8 && hardware.outtakeL.getPower()>0.2 && readyTime.seconds()>1.5)) {//altered with time
+        //time-based bar for  outtake gate,  removeifyoudot want
+        if (((gamepad2.right_bumper||gamepad2.left_bumper) && hardware.outtakeL.getPower()<0.2) ||
+                ((gamepad2.right_bumper||gamepad2.left_bumper) && hardware.outtakeL.getPower()>0.2 && readyTime.seconds()>1.5)) {//altered with time
             hardware.feedOuttake(-1);//inv for controller's sake
         }
         else if (gamepad2.left_trigger>0.8) {

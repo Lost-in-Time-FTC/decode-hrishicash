@@ -18,11 +18,15 @@ public class Hardware {
     public DcMotor outtakeL;
     public DcMotor outtakeR;
     public List<DcMotor> outtakeMotors;
-    public CRServo outtakeFeeder;
+    public CRServo outtakeGate;
+    public CRServo rotatorR;
+    public CRServo rotatorL;
     public VoltageSensor myControlHubVoltageSensor;//funny alex addition
 
 
-    public DcMotor intake;
+    public DcMotor intakeL;
+
+    public  DcMotor intakeR;
 
     public Hardware(HardwareMap hardwareMap) {
         fR = hardwareMap.get(DcMotor.class, "fR");
@@ -37,8 +41,9 @@ public class Hardware {
         outtakeR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         outtakeR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         outtakeMotors = Arrays.asList(outtakeL, outtakeR);
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        outtakeFeeder = hardwareMap.get(CRServo.class, "outtakeFeeder");
+        intakeL = hardwareMap.get(DcMotor.class, "intakeLeft");
+        intakeR = hardwareMap.get(DcMotor.class, "intakeRight");
+        outtakeGate = hardwareMap.get(CRServo.class, "outtakeGate");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -49,7 +54,8 @@ public class Hardware {
 
         outtakeL.setDirection(DcMotor.Direction.REVERSE);
         outtakeR.setDirection(DcMotor.Direction.REVERSE);
-        intake.setDirection(DcMotor.Direction.FORWARD);
+        intakeL.setDirection(DcMotor.Direction.FORWARD);
+        intakeR.setDirection(DcMotor.Direction.REVERSE);
 
         myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");//funny alex addition
     }
@@ -97,9 +103,15 @@ public class Hardware {
     }
 
     public final void feedOuttake(double power) {
-        outtakeFeeder.setPower(power);
+        outtakeGate.setPower(power);
     }
     //NEGATIVE IS INTAKE
+
+    public final void rotateOuttake(double power){
+        rotatorL.setPower(power);
+        rotatorR.setPower(power);
+        //MUST TEST - I don't know which direction is which
+    }
 
     public final void runOuttake() {
         outtakeL.setPower(0.8);

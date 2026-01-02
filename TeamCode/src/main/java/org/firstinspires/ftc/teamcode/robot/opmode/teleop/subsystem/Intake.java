@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 
+//intake now updated from previous robot
 public class Intake {
     private Hardware hardware;
     private Telemetry telemetry;
@@ -22,13 +23,16 @@ public class Intake {
     }
     public void run() {
         if(gamepad2.a) {
-            hardware.intake.setPower(-1);
+            hardware.intakeL.setPower(-1);
+            hardware.intakeR.setPower(-1);
         }
         else if(gamepad2.b) {
-            hardware.intake.setPower(1);
+            hardware.intakeL.setPower(1);
+            hardware.intakeR.setPower(1);
         }
         else {
-            hardware.intake.setPower(0);
+            hardware.intakeL.setPower(0);
+            hardware.intakeR.setPower(0);
         }
     }
 /*
