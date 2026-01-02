@@ -41,8 +41,8 @@ public class Hardware {
         outtakeR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         outtakeR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         outtakeMotors = Arrays.asList(outtakeL, outtakeR);
-        intakeL = hardwareMap.get(DcMotor.class, "intakeLeft");
-        intakeR = hardwareMap.get(DcMotor.class, "intakeRight");
+        intakeL = hardwareMap.get(DcMotor.class, "intakeL");
+        intakeR = hardwareMap.get(DcMotor.class, "intakeR");
         outtakeGate = hardwareMap.get(CRServo.class, "outtakeGate");
 
         // Most robots need the motor on one side to be reversed to drive forward
