@@ -22,14 +22,17 @@ public class Outtake {
 
     }
 
+    public void run() {
 
-    public ElapsedTime run(ElapsedTime readyTime) {//altered with time
+    }
+
+    /*public ElapsedTime run(ElapsedTime readyTime) {//altered with time
         //outtakeR is top
-        currentVoltage = hardware.myControlHubVoltageSensor.getVoltage();
-        int currentPos = hardware.outtakeL.getCurrentPosition();
-        telemetry.addData("encoder", currentPos);
-        telemetry.update();
-        if (gamepad2.x) {
+        //currentVoltage = hardware.myControlHubVoltageSensor.getVoltage();
+        //int currentPos = hardware.outtakeL.getCurrentPosition();
+        //telemetry.addData("encoder", currentPos);
+        //telemetry.update();
+        /*if (gamepad2.x) {
             hardware.outtakeL.setPower(1);
             hardware.outtakeR.setPower(0.8);
             //hardware.outtakeR.setPower(1);
@@ -64,5 +67,5 @@ public class Outtake {
             hardware.feedOuttake(0);
         }
         return readyTime;//altered with time
-    }
+    }*/
 }

@@ -4,11 +4,16 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
+import com.pedropathing.ftc.localization.Encoder;
+import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.ftc.localization.constants.TwoWheelConstants;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
@@ -27,16 +32,11 @@ public class Constants {
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
-    public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
-        .forwardEncoder_HardwareMapName("leftFront")
-        .strafeEncoder_HardwareMapName("rightRear")
-        .IMU_HardwareMapName("imu")
-        .IMU_Orientation(
-            new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.LEFT
-            )
-        );
+    public static PinpointConstants localizerConstants = new PinpointConstants()
+        .forwardPodY(0.89217913386) //I addedd this - aledx
+        .strafePodX(3.104086614)    // please dont kill me thanks
+            .distanceUnit(DistanceUnit.INCH)
+            .customEncoderResolution(8192);
 
 
 
@@ -44,7 +44,7 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
             .pathConstraints(pathConstraints)
             .mecanumDrivetrain(driveConstants)
-            .twoWheelLocalizer(localizerConstants)
+            .pinpointLocalizer(localizerConstants)
             .build();
     }
 }

@@ -46,6 +46,7 @@ public class Tele extends OpMode {
         drive.run();
         //intake.run(previousGamepad2, currentGamepad2);
         intake.run();
-        outtakeTime = outtake.run(outtakeTime);//altered with time
+        //outtakeTime = outtake.run(outtakeTime);//altered with time
+        outtake.run();
     }
 }

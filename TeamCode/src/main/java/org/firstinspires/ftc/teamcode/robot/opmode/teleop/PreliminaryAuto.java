@@ -179,7 +179,7 @@ public class PreliminaryAuto extends LinearOpMode {
 
         //Step 3: you may fire when ready
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 1.5)) {
+        /*while (opModeIsActive() && (runtime.seconds() < 1.5)) {
             hardware.runOuttake();
             telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
@@ -191,7 +191,7 @@ public class PreliminaryAuto extends LinearOpMode {
             telemetry.update();
         }
         hardware.stopOuttake();
-        hardware.feedOuttake(0);
+        hardware.feedOuttake(0);*/
 
 
         // Step 4:  Stop
