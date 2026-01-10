@@ -33,6 +33,9 @@ public class Hardware {
         bR = hardwareMap.get(DcMotor.class, "bR");
         bL = hardwareMap.get(DcMotor.class, "bL");
         driveMotors = Arrays.asList(fR, fL, bR, bL);
+
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
         //outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
         //outtakeL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //outtakeL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

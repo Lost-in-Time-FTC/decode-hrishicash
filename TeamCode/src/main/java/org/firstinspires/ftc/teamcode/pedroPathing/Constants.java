@@ -36,8 +36,8 @@ public class Constants {
         .forwardPodY(0.89217913386) //I addedd this - aledx
         .strafePodX(3.104086614)    // please dont kill me thanks
             .distanceUnit(DistanceUnit.INCH)
-            .customEncoderResolution(8192);
-
+            .customEncoderResolution(8192)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {
