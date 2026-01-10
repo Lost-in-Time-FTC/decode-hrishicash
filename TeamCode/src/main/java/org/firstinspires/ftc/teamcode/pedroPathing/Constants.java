@@ -37,7 +37,7 @@ public class Constants {
         .strafePodX(3.104086614)    // please dont kill me thanks
             .distanceUnit(DistanceUnit.INCH)
             .customEncoderResolution(8192)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED); //finally works
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {

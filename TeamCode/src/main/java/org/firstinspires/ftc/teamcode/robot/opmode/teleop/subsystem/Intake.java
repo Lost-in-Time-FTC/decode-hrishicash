@@ -21,7 +21,7 @@ public class Intake {
         this.telemetry = telemetry;
         this.gamepad2 = gamepad2;
     }
-    public void run() {
+    public void run() { //kushal wants just one controller
         if(gamepad2.a) {
             hardware.intakeL.setPower(-1);
             hardware.intakeR.setPower(-1);
