@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-        .mass(7.25748);
+        .mass(8.35);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
         .maxPower(1)
@@ -33,11 +33,13 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-        .forwardPodY(0.89217913386) //I addedd this - aledx
-        .strafePodX(3.104086614)    // please dont kill me thanks
+        .forwardPodY(-0.89217913386) // in inches
+        .strafePodX(-3.104086614)    // please dont kill me thanks
             .distanceUnit(DistanceUnit.INCH)
-            .customEncoderResolution(8192)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED); //finally works
+            .hardwareMapName("pinpoint")
+            .customEncoderResolution(8192/(Math.PI * 1.3662))
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)//; //finally works
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {
