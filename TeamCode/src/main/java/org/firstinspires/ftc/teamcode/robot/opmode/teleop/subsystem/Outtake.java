@@ -24,6 +24,26 @@ public class Outtake {
 
     public void run() {
 
+        //stand-ins until odo works
+        double xPos = 0;
+        double yPos = 0;
+        double robotHeading = 0; //0 heading is towards main QR code; CCW is pos; in rad;
+        double outtakeHeading = 0; //radians off of robot's relative heading
+
+        double xGoal = 132;
+        double yGoal = 137;
+
+        double xDistance = xGoal - xPos;
+        double yDistance = yGoal - yPos;
+
+        double absTargetAngle = 90 - Math.atan(yDistance/xDistance);
+
+        double absLauncherAngle = robotHeading + outtakeHeading;
+
+        double finalAngle = absLauncherAngle - absTargetAngle; //should work, pretty much psuedo code
+        //I don't know how the axon encoder stuff works sorry about that
+
+
     }
 
     /*public ElapsedTime run(ElapsedTime readyTime) {//altered with time

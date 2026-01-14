@@ -35,7 +35,7 @@ public class Constants {
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
         .forwardPodY(-0.89217913386) // in inches
-        .strafePodX(-3.104086614)    // please dont kill me thanks
+        .strafePodX(-3.104086614)    // please don't kill me thanks
             .distanceUnit(DistanceUnit.MM)
             .hardwareMapName("pinpoint")
             .customEncoderResolution(2048/(Math.PI * 35)) //trying this with quad resolution

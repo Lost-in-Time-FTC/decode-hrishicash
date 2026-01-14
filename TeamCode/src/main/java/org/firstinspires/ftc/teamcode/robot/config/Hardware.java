@@ -16,17 +16,19 @@ public class Hardware {
     public DcMotor bL;
     public DcMotor bR;
     public List<DcMotor> driveMotors;
-//    public DcMotor outtakeL;
-//    public DcMotor outtakeR;
+    public DcMotor outtakeL;
+    public DcMotor outtakeR;
 //    public List<DcMotor> outtakeMotors;
     public Servo outtakeGate;
     public CRServo outtakeRotatorR;
     public CRServo outtakeRotatorL;
-    public CRServo outtakeLauncher;
+    public CRServo outtakeLauncher; // "hood" servo
     public DcMotor intakeL;
     public  DcMotor intakeR;
 
     public Hardware(HardwareMap hardwareMap) {
+
+        // DRIVE MOTORS
         fR = hardwareMap.get(DcMotor.class, "fR");
         fL = hardwareMap.get(DcMotor.class, "fL");
         bR = hardwareMap.get(DcMotor.class, "bR");
@@ -35,14 +37,7 @@ public class Hardware {
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
-//        outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
-        //outtakeL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //outtakeL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
-
-        //outtakeR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //outtakeR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //outtakeMotors = Arrays.asList(outtakeL, outtakeR);
+        // INTAKE SYSTEM
         intakeL = hardwareMap.get(DcMotor.class, "intakeL");
         intakeR = hardwareMap.get(DcMotor.class, "intakeR");
 
@@ -51,6 +46,8 @@ public class Hardware {
         outtakeRotatorL = hardwareMap.get(CRServo.class, "outtakeRotatorL");
         outtakeRotatorR = hardwareMap.get(CRServo.class, "outtakeRotatorR");
         outtakeLauncher = hardwareMap.get(CRServo.class, "outtakeLauncher");
+        outtakeL = hardwareMap.get(DcMotor.class, "outakeL");
+        outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -59,8 +56,9 @@ public class Hardware {
         fL.setDirection(DcMotor.Direction.FORWARD);
         fR.setDirection(DcMotor.Direction.REVERSE);
 
-        //outtakeL.setDirection(DcMotor.Direction.REVERSE);
-        //outtakeR.setDirection(DcMotor.Direction.REVERSE);
+        outtakeL.setDirection(DcMotor.Direction.FORWARD);
+        outtakeR.setDirection(DcMotor.Direction.REVERSE);
+
         intakeL.setDirection(DcMotor.Direction.FORWARD);
         intakeR.setDirection(DcMotor.Direction.REVERSE);
 
