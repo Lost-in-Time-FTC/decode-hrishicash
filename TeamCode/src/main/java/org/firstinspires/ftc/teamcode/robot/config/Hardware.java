@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.VoltageSensor;//funny alex addition
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,14 +16,14 @@ public class Hardware {
     public DcMotor bL;
     public DcMotor bR;
     public List<DcMotor> driveMotors;
-    //public DcMotor outtakeL;
-    //public DcMotor outtakeR;
-    //public List<DcMotor> outtakeMotors;
-    //public CRServo outtakeGate;
-    public CRServo rotatorR;
-    public CRServo rotatorL;
+//    public DcMotor outtakeL;
+//    public DcMotor outtakeR;
+//    public List<DcMotor> outtakeMotors;
+    public Servo outtakeGate;
+    public CRServo outtakeRotatorR;
+    public CRServo outtakeRotatorL;
+    public CRServo outtakeLauncher;
     public DcMotor intakeL;
-
     public  DcMotor intakeR;
 
     public Hardware(HardwareMap hardwareMap) {
@@ -36,16 +35,22 @@ public class Hardware {
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
-        //outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
+//        outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
         //outtakeL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //outtakeL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
+//        outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
+
         //outtakeR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //outtakeR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //outtakeMotors = Arrays.asList(outtakeL, outtakeR);
         intakeL = hardwareMap.get(DcMotor.class, "intakeL");
         intakeR = hardwareMap.get(DcMotor.class, "intakeR");
-        //outtakeGate = hardwareMap.get(CRServo.class, "outtakeGate");
+
+        // OUTTAKE SYSTEM
+        outtakeGate = hardwareMap.get(Servo.class, "outtakeGate");
+        outtakeRotatorL = hardwareMap.get(CRServo.class, "outtakeRotatorL");
+        outtakeRotatorR = hardwareMap.get(CRServo.class, "outtakeRotatorR");
+        outtakeLauncher = hardwareMap.get(CRServo.class, "outtakeLauncher");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -109,8 +114,8 @@ public class Hardware {
     //NEGATIVE IS INTAKE
 
     public final void rotateOuttake(double power){
-        rotatorL.setPower(power);
-        rotatorR.setPower(power);
+        outtakeRotatorL.setPower(power);
+        outtakeRotatorR.setPower(power);
         //MUST TEST - I don't know which direction is which
     }
 
