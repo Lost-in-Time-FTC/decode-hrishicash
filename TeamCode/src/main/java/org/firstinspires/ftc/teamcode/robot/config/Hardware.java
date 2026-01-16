@@ -117,15 +117,15 @@ public class Hardware {
         //MUST TEST - I don't know which direction is which
     }
 
-    /*public final void runOuttake() {
-        outtakeL.setPower(0.8);
-        outtakeR.setPower(1);
+    public final void runOuttake(int val) {
+        outtakeL.setPower(-val);
+        outtakeR.setPower(val);
     }
 
     public final void stopOuttake() {
         outtakeL.setPower(0);
         outtakeR.setPower(0);
-    }*/
+    }
 
     public final void stopDrive() {
         fR.setPower(0);

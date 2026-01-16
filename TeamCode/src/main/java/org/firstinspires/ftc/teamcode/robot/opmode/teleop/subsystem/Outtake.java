@@ -24,6 +24,30 @@ public class Outtake {
 
     public void run() {
 
+        //basic user controlled stuff
+
+        // PITCH
+        if (gamepad2.right_trigger>0.8) {
+            hardware.rotateOuttake(-1);
+        } else if (gamepad2.left_trigger>0.8) {
+            hardware.rotateOuttake(1);
+        } else { hardware.rotateOuttake(0);}
+
+        // YAW
+        if(gamepad2.right_bumper) {
+            hardware.outtakeLauncher.setPower(0.8);
+        } else if (gamepad2.left_bumper) {
+            hardware.outtakeLauncher.setPower(-0.8);
+        }else {hardware.outtakeLauncher.setPower(0);}
+
+        // LAUNCH
+        if (gamepad2.y) {
+            hardware.runOuttake(1);
+        } else if (gamepad2.x) {
+            hardware.runOuttake(-1);
+        } else {hardware.runOuttake(0);}
+
+        /*
         //stand-ins until odo works
         double xPos = 0;
         double yPos = 0;
@@ -42,7 +66,7 @@ public class Outtake {
 
         double finalAngle = absLauncherAngle - absTargetAngle; //should work, pretty much psuedo code
         //I don't know how the axon encoder stuff works sorry about that
-
+        */
 
     }
 
