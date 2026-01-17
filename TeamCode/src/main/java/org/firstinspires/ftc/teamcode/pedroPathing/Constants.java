@@ -28,8 +28,8 @@ public class Constants {
         .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
         .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
         .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-        .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
-        //.xVelocity(217.5953); (other test got 156) (183.2711) (187.64697842) (273.219) (246.743)
+        .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+        .xVelocity(70.577885); // 70.671537 // 70.402644 // 70.659474 // avg: 70.577885
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 

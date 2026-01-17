@@ -4,6 +4,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -17,8 +18,8 @@ public class Hardware {
     public DcMotor bL;
     public DcMotor bR;
     public List<DcMotor> driveMotors;
-    public DcMotor outtakeL;
-    public DcMotor outtakeR;
+    public DcMotorEx outtakeL;
+    public DcMotorEx outtakeR;
 //    public List<DcMotor> outtakeMotors;
     public Servo outtakeGate;
     public CRServo outtakeRotatorR;
@@ -57,8 +58,8 @@ public class Hardware {
         outtakeLauncher = hardwareMap.get(CRServo.class, "outtakeLauncher");
         outtakeLauncherEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
 
-        outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
-        outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
+        outtakeL = hardwareMap.get(DcMotorEx.class, "outtakeL");
+        outtakeR = hardwareMap.get(DcMotorEx.class, "outtakeR");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -130,9 +131,10 @@ public class Hardware {
         //MUST TEST - I don't know which direction is which
     }
 
-    public final void runOuttake(int val) {
-        outtakeL.setPower(-val);
-        outtakeR.setPower(val);
+    public final void runOuttake(int rpm) {
+        double vel = (rpm/60.0)*28;
+        outtakeL.setPower(-vel);
+        outtakeR.setPower(vel);
     }
 
     public final void stopOuttake() {

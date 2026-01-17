@@ -11,7 +11,6 @@ public class Outtake {
     private Hardware hardware;
     private Telemetry telemetry;
     private Gamepad gamepad2;
-    private boolean feederToggle = false;
     private double currentVoltage;
     private double pastPos;
 
@@ -52,11 +51,10 @@ public class Outtake {
 
         // LAUNCH
         if (gamepad2.y) {
-            //hardware.runOuttake(1);
-            hardware.runOuttake(-1);
-        } /*else if (gamepad2.y) {
-            hardware.runOuttake(-1);
-        }*/ else {hardware.runOuttake(0);}
+            //hardware.runOuttake(-1);
+            hardware.runOuttake(5800);
+
+        } else {hardware.runOuttake(0);}
 
         /*
         //stand-ins until odo works
