@@ -38,7 +38,7 @@ public class Constants {
         .strafePodX(-3.104086614)    // please don't kill me thanks
             .distanceUnit(DistanceUnit.MM)
             .hardwareMapName("pinpoint")
-            .customEncoderResolution(2048/(Math.PI * 35)) //trying this with quad resolution
+            .customEncoderResolution(8192/(Math.PI * 35)) //trying this with quad resolution
             //.forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)//; //finally works
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 

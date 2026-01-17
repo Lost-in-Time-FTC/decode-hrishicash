@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot.config;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,8 +22,11 @@ public class Hardware {
 //    public List<DcMotor> outtakeMotors;
     public Servo outtakeGate;
     public CRServo outtakeRotatorR;
+    public AnalogInput outtakeRotatorREncoder;
     public CRServo outtakeRotatorL;
+    public AnalogInput outtakeRotatorLEncoder;
     public CRServo outtakeLauncher; // "hood" servo
+    public AnalogInput outtakeLauncherEncoder;
     public DcMotor intakeL;
     public  DcMotor intakeR;
 
@@ -43,10 +47,17 @@ public class Hardware {
 
         // OUTTAKE SYSTEM
         outtakeGate = hardwareMap.get(Servo.class, "outtakeGate");
+
         outtakeRotatorL = hardwareMap.get(CRServo.class, "outtakeRotatorL");
+        outtakeRotatorLEncoder = hardwareMap.get(AnalogInput.class, "outtakeRotatorLEncoder");
+
         outtakeRotatorR = hardwareMap.get(CRServo.class, "outtakeRotatorR");
+        outtakeRotatorREncoder = hardwareMap.get(AnalogInput.class, "outtakeRotatorREncoder");
+
         outtakeLauncher = hardwareMap.get(CRServo.class, "outtakeLauncher");
-        outtakeL = hardwareMap.get(DcMotor.class, "outakeL");
+        outtakeLauncherEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
+
+        outtakeL = hardwareMap.get(DcMotor.class, "outtakeL");
         outtakeR = hardwareMap.get(DcMotor.class, "outtakeR");
 
         // Most robots need the motor on one side to be reversed to drive forward
@@ -57,10 +68,12 @@ public class Hardware {
         fR.setDirection(DcMotor.Direction.REVERSE);
 
         outtakeL.setDirection(DcMotor.Direction.FORWARD);
-        outtakeR.setDirection(DcMotor.Direction.REVERSE);
+        outtakeR.setDirection(DcMotor.Direction.FORWARD);
 
         intakeL.setDirection(DcMotor.Direction.FORWARD);
         intakeR.setDirection(DcMotor.Direction.REVERSE);
+
+        pinpoint.resetPosAndIMU();
 
     }
 
