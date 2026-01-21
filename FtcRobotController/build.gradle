@@ -1,5 +1,7 @@
 import java.text.SimpleDateFormat
 
+//implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
+
 //
 // build.gradle in FtcRobotController
 //

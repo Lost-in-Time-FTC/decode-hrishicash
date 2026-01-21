@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +21,9 @@ public class Hardware {
     public DcMotor bR;
     public List<DcMotor> driveMotors;
     public DcMotorEx outtakeL;
+    //public AnalogInput outtakeLEncoder;
     public DcMotorEx outtakeR;
+    //public AnalogInput outtakeREncoder;
 //    public List<DcMotor> outtakeMotors;
     public Servo outtakeGate;
     public CRServo outtakeRotatorR;
@@ -30,6 +34,7 @@ public class Hardware {
     public AnalogInput outtakeLauncherEncoder;
     public DcMotor intakeL;
     public  DcMotor intakeR;
+    //private Telemetry telemetry;
 
     public Hardware(HardwareMap hardwareMap) {
 
@@ -59,7 +64,14 @@ public class Hardware {
         outtakeLauncherEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
 
         outtakeL = hardwareMap.get(DcMotorEx.class, "outtakeL");
+        outtakeL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        outtakeL.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        //outtakeLEncoder = hardwareMap.get(AnalogInput.class, "outtakeLEncoder");
+
         outtakeR = hardwareMap.get(DcMotorEx.class, "outtakeR");
+        outtakeR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        outtakeR.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        //outtakeLEncoder = hardwareMap.get(AnalogInput.class, "outtakeLEncoder");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -152,5 +164,28 @@ public class Hardware {
         bR.setPower(0);
         fL.setPower(0);
         bL.setPower(0);
+    }
+
+    public final void printEncoders(Telemetry telemetry) {
+        try {
+            telemetry.addData("hood position: ", outtakeLauncherEncoder.getVoltage());
+        } catch (Exception e) {
+            telemetry.addData("hood position: ", "ERROR");
+        }
+        try {
+            telemetry.addData("turret position: ", outtakeRotatorREncoder.getVoltage());
+        } catch (Exception e) {
+            telemetry.addData("turret position: ", "ERROR");
+        }
+        try {
+            telemetry.addData("outtake speed: ", outtakeL.getVelocity()); //tops out at like 2300
+        } catch (Exception e) {
+            telemetry.addData("outtake speed: ", "ERROR");
+        }
+
+        //telemetry.addData("turret position: ", outtakeRotatorREncoder.getVoltage());
+        //telemetry.addData("outtake speed: ", outtakeL.getVelocity());
+        //telemetry.addData("status? ", 1);
+        telemetry.update();
     }
 }

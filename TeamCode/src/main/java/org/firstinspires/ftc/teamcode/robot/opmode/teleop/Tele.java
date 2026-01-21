@@ -48,5 +48,7 @@ public class Tele extends OpMode {
         intake.run();
         //outtakeTime = outtake.run(outtakeTime);//altered with time
         outtake.run();
+
+        hardware.printEncoders(telemetry);
     }
 }
