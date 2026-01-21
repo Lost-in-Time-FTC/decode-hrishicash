@@ -133,8 +133,13 @@ public class Hardware {
 
     public final void runOuttake(int rpm) {
         double vel = (rpm/60.0)*28;
-        outtakeL.setPower(-vel);
-        outtakeR.setPower(vel);
+        outtakeL.setPower(vel);
+        outtakeR.setPower(-vel);
+    }
+
+    public final void runOuttake() {
+        outtakeL.setPower(1);
+        outtakeR.setPower(-1);
     }
 
     public final void stopOuttake() {

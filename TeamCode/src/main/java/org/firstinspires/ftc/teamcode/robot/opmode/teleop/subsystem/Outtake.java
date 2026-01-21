@@ -63,8 +63,8 @@ public class Outtake {
         double robotHeading = 0; //0 heading is towards main QR code; CCW is pos; in rad;
         double outtakeHeading = 0; //radians off of robot's relative heading
 
-        double xGoal = 132;
-        double yGoal = 137;
+        double xGoal = 132; //in inches, might need to be mm
+        double yGoal = 137; //in inches, might need to be mm
 
         double xDistance = xGoal - xPos;
         double yDistance = yGoal - yPos;
@@ -75,6 +75,8 @@ public class Outtake {
 
         double finalAngle = absLauncherAngle - absTargetAngle; //should work, pretty much psuedo code
         //I don't know how the axon encoder stuff works sorry about that
+        //need to get axon voltage, translate to radians for angle
+        //PID necessary?
         */
 
     }
