@@ -39,8 +39,8 @@ public class Constants {
             .distanceUnit(DistanceUnit.MM)
             .hardwareMapName("pinpoint")
             .customEncoderResolution(8192/(Math.PI * 35)) //trying this with quad resolution
-            //.forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)//; //finally works
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)//; //finally works
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
 
     public static Follower createFollower(HardwareMap hardwareMap) {

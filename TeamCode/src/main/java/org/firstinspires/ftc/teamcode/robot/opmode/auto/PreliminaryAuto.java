@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.robot.opmode.teleop;
+package org.firstinspires.ftc.teamcode.robot.opmode.auto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -36,9 +36,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
-import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Drive;
-import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Intake;
-import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Outtake;
 
 /*
  * This OpMode illustrates the concept of driving a path based on time.
