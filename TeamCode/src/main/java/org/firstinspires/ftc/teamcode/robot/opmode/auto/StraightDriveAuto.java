@@ -28,7 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.robot.opmode.teleop;
+package org.firstinspires.ftc.teamcode.robot.opmode.auto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -59,7 +59,7 @@ import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 //Robot: Auto Drive By Time
 @Autonomous(name="LIT Rightside Boring AUTO", group="Robot")
 //@Disabled
-public class StraightDriveAUTO extends LinearOpMode {
+public class StraightDriveAuto extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor         fL   = null;
