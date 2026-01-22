@@ -37,10 +37,12 @@ public class Outtake {
         // YAW
         if(gamepad2.right_bumper) {
             hardware.outtakeLauncher.setPower(0.8);
+            //hardware.outtakeGate.setPosition(-0.8);
             //hardware.rotateOuttake(0.8);
             telemetry.addData("hood position: ", hardware.outtakeLauncherEncoder.getVoltage());
         } else if (gamepad2.left_bumper) {
             hardware.outtakeLauncher.setPower(-0.8);
+            //hardware.outtakeGate.setPosition(1);
             //hardware.rotateOuttake(-0.8);
             telemetry.addData("hood position: ", hardware.outtakeLauncherEncoder.getVoltage());
         }else {
@@ -49,12 +51,20 @@ public class Outtake {
 
         }
 
+        // OPEN GATE
+        if (gamepad2.dpad_down) {
+            hardware.outtakeGate.setPosition(1);
+        } else {hardware.outtakeGate.setPosition(-0.8);}
+
         // LAUNCH
         if (gamepad2.y) {
             //hardware.runOuttake(-1);
-            hardware.runOuttake(5800);
+            hardware.runOuttake(2200);
 
-        } else {hardware.runOuttake(0);}
+        } else if (gamepad2.x) {
+           hardware.runOuttake();
+        }
+        else {hardware.runOuttake(0);}
 
         /*
         //stand-ins until odo works

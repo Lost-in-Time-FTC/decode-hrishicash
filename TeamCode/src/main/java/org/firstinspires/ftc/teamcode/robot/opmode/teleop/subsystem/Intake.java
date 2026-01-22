@@ -30,10 +30,6 @@ public class Intake {
             hardware.intakeL.setPower(1);
             hardware.intakeR.setPower(1);
         }
-        else if(gamepad2.x) {
-            hardware.intakeL.setPower(-0.75);
-            hardware.intakeR.setPower(0.75);
-        }
         else {
             hardware.intakeL.setPower(0);
             hardware.intakeR.setPower(0);
