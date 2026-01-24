@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem;
 
+import static androidx.core.math.MathUtils.clamp;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Outtake {
     private Hardware hardware;
@@ -18,14 +19,75 @@ public class Outtake {
         this.hardware = hardware;
         this.telemetry = telemetry;
         this.gamepad2 = gamepad2;
+    }
+
+    // adjust hood
+    public void pitch() {
 
     }
 
-    public void run() {
+    // rotate turret
+    public void yaw() {
 
-        //basic user controlled stuff
+    }
 
-        // PITCH
+    public void openGate() {
+        hardware.outtakeGate.setPosition(1);
+    }
+
+    public void closeGate() {
+        hardware.outtakeGate.setPosition(-0.8);
+    }
+
+    public void launch(int rpm) {
+        hardware.runOuttake(rpm);
+    }
+
+    public void launch() {
+        hardware.runOuttake();
+    }
+
+    public void stop() {
+        hardware.runOuttake(0);
+    }
+
+    public void track(Pose pose) {
+//        hardware.outtakeRotatorRAxon.setPidCoeffs(0.02, 0.0005, 0.0025);
+
+        double xPos = pose.getX();
+        double yPos = pose.getY();
+        double robotHeading = pose.getHeading(); //0 heading is towards main QR code; CCW is pos; in rad;
+        // radians from axon servo
+//        double outtakeHeading = hardware.outtakeRotatorREncoder.getVoltage() / 3.3 * 2 * Math.PI - 0.45; // minus offset
+
+        double outtakeHeading = Math.toRadians(hardware.outtakeRotatorRAxon.getTotalRotation());
+
+        Pose blueGoalPose = new Pose(50, 84, Math.toRadians(135));
+
+        double dX = blueGoalPose.getX() - xPos;
+        double dY = blueGoalPose.getY() - yPos;
+
+        double absTargetAngle = Math.atan2(dY, dX);
+
+        double absLauncherAngle = robotHeading + outtakeHeading;
+
+        double error = absTargetAngle - absLauncherAngle;
+        error = Math.atan2(Math.sin(error), Math.cos(error)); // normalize to [-pi, pi]
+
+        double kP = 3;
+        double power = kP * error;
+        if (Math.abs(error) < 0.01) power = 0;
+        hardware.outtakeRotatorRAxon.setPower(power);
+        hardware.outtakeRotatorL.setPower(power);
+//        hardware.rotateOuttake(clamp(power, -1, 1));
+        telemetry.addData("Is this running?", "PLEASE");
+    }
+
+    public void run(Pose pose) {
+        hardware.outtakeRotatorRAxon.update();
+        track(pose);
+
+        // YAW
         if (gamepad2.right_trigger>0.8) {
             hardware.rotateOuttake(-0.8);
         } else if (gamepad2.left_trigger>0.8) {
@@ -34,61 +96,37 @@ public class Outtake {
             hardware.rotateOuttake(0);
         }
 
-        // YAW
+        // PITCH (outtake hood)
         if(gamepad2.right_bumper) {
-            hardware.outtakeLauncher.setPower(0.8);
+            hardware.outtakeHood.setPower(0.8);
             //hardware.outtakeGate.setPosition(-0.8);
             //hardware.rotateOuttake(0.8);
-            telemetry.addData("hood position: ", hardware.outtakeLauncherEncoder.getVoltage());
+            telemetry.addData("hood position: ", hardware.outtakeHoodEncoder.getVoltage());
         } else if (gamepad2.left_bumper) {
-            hardware.outtakeLauncher.setPower(-0.8);
+            hardware.outtakeHood.setPower(-0.8);
             //hardware.outtakeGate.setPosition(1);
             //hardware.rotateOuttake(-0.8);
-            telemetry.addData("hood position: ", hardware.outtakeLauncherEncoder.getVoltage());
+            telemetry.addData("hood position: ", hardware.outtakeHoodEncoder.getVoltage());
         }else {
-            hardware.outtakeLauncher.setPower(0);
+            hardware.outtakeHood.setPower(0);
             //hardware.rotateOuttake(0);
-
         }
 
         // OPEN GATE
         if (gamepad2.dpad_down) {
-            hardware.outtakeGate.setPosition(1);
-        } else {hardware.outtakeGate.setPosition(-0.8);}
+            openGate();
+        } else {
+            closeGate();
+        }
 
         // LAUNCH
         if (gamepad2.y) {
-            //hardware.runOuttake(-1);
-            hardware.runOuttake(2200);
-
+            launch(2200);
         } else if (gamepad2.x) {
-           hardware.runOuttake();
+           launch();
+        } else {
+            stop();
         }
-        else {hardware.runOuttake(0);}
-
-        /*
-        //stand-ins until odo works
-        double xPos = 0;
-        double yPos = 0;
-        double robotHeading = 0; //0 heading is towards main QR code; CCW is pos; in rad;
-        double outtakeHeading = 0; //radians off of robot's relative heading
-
-        double xGoal = 132; //in inches, might need to be mm
-        double yGoal = 137; //in inches, might need to be mm
-
-        double xDistance = xGoal - xPos;
-        double yDistance = yGoal - yPos;
-
-        double absTargetAngle = 90 - Math.atan(yDistance/xDistance);
-
-        double absLauncherAngle = robotHeading + outtakeHeading;
-
-        double finalAngle = absLauncherAngle - absTargetAngle; //should work, pretty much psuedo code
-        //I don't know how the axon encoder stuff works sorry about that
-        //need to get axon voltage, translate to radians for angle
-        //PID necessary?
-        */
-
     }
 
     /*public ElapsedTime run(ElapsedTime readyTime) {//altered with time

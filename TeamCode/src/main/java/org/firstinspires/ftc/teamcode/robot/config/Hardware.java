@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.rtpAxon.RTPAxon;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,8 +31,9 @@ public class Hardware {
     public AnalogInput outtakeRotatorREncoder;
     public CRServo outtakeRotatorL;
     public AnalogInput outtakeRotatorLEncoder;
-    public CRServo outtakeLauncher; // "hood" servo
-    public AnalogInput outtakeLauncherEncoder;
+    public RTPAxon outtakeRotatorRAxon;
+    public CRServo outtakeHood; // "hood" servo
+    public AnalogInput outtakeHoodEncoder;
     public DcMotor intakeL;
     public  DcMotor intakeR;
     //private Telemetry telemetry;
@@ -59,9 +61,10 @@ public class Hardware {
 
         outtakeRotatorR = hardwareMap.get(CRServo.class, "outtakeRotatorR");
         outtakeRotatorREncoder = hardwareMap.get(AnalogInput.class, "outtakeRotatorREncoder");
+        outtakeRotatorRAxon = new RTPAxon(outtakeRotatorR, outtakeRotatorREncoder);
 
-        outtakeLauncher = hardwareMap.get(CRServo.class, "outtakeLauncher");
-        outtakeLauncherEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
+        outtakeHood = hardwareMap.get(CRServo.class, "outtakeLauncher");
+        outtakeHoodEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
 
         outtakeL = hardwareMap.get(DcMotorEx.class, "outtakeL");
         outtakeL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -168,12 +171,12 @@ public class Hardware {
 
     public final void printEncoders(Telemetry telemetry) {
         try {
-            telemetry.addData("hood position: ", outtakeLauncherEncoder.getVoltage());
+            telemetry.addData("hood position: ", outtakeHoodEncoder.getVoltage());
         } catch (Exception e) {
             telemetry.addData("hood position: ", "ERROR");
         }
         try {
-            telemetry.addData("turret position: ", outtakeRotatorREncoder.getVoltage());
+            telemetry.addData("turret position: ", outtakeRotatorRAxon.getTotalRotation());
         } catch (Exception e) {
             telemetry.addData("turret position: ", "ERROR");
         }

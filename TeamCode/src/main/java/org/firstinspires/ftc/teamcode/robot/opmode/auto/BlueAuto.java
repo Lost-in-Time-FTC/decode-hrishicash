@@ -12,10 +12,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 
 @Autonomous(name = "Blue Auto", group = "Autonomous")
 @Configurable // Panels
 public class BlueAuto extends OpMode {
+    private Hardware hardware;
     public Follower follower; // Pedro Pathing follower instance
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     private int pathState; // Current autonomous path state (state machine)
@@ -23,6 +25,8 @@ public class BlueAuto extends OpMode {
 
     @Override
     public void init() {
+        hardware = new Hardware(hardwareMap);
+
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
@@ -57,51 +61,81 @@ public class BlueAuto extends OpMode {
     }
 
     public void autonomousPathUpdate() {
-        // Access paths with paths.pathName
         switch (pathState) {
             case 0:
-                follower.followPath(paths.Path1);
+                follower.followPath(paths.startToShootPath);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line2);
+                    // run intake
+                    hardware.intakeL.setPower(-1);
+                    hardware.intakeR.setPower(-1);
+
+                    follower.followPath(paths.pickupRightToGatePath);
+
+                    // stop intake
+                    hardware.intakeL.setPower(0);
+                    hardware.intakeR.setPower(0);
+
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.Path4);
+                    follower.followPath(paths.pickupRightToShootPath);
+                    // TODO: shoot
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line4);
+                    // run intake
+                    hardware.intakeL.setPower(-1);
+                    hardware.intakeR.setPower(-1);
+
+                    follower.followPath(paths.pickupMiddlePath);
+
+                    // stop intake
+                    hardware.intakeL.setPower(0);
+                    hardware.intakeR.setPower(0);
+
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line5);
+                    follower.followPath(paths.pickupMiddleToShootPath);
+                    // TODO: shoot
                     setPathState(5);
                 }
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line6);
+                    // run intake
+                    hardware.intakeL.setPower(-1);
+                    hardware.intakeR.setPower(-1);
+
+                    follower.followPath(paths.pickupLeftPath);
+
+                    // stop intake
+                    hardware.intakeL.setPower(0);
+                    hardware.intakeR.setPower(0);
+
                     setPathState(6);
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line7);
+                    follower.followPath(paths.pickupLeftToShootPath);
+                    // TODO: Shoot
+                    hardware.runOuttake();
                     setPathState(7);
                 }
                 break;
             case 7:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.line8);
+                    follower.followPath(paths.autoParkPath);
                     setPathState(8);
                 }
                 break;
@@ -114,17 +148,17 @@ public class BlueAuto extends OpMode {
     }
 
     public static class Paths {
-        public PathChain Path1;
-        public PathChain line2;
-        public PathChain Path4;
-        public PathChain line4;
-        public PathChain line5;
-        public PathChain line6;
-        public PathChain line7;
-        public PathChain line8;
+        public PathChain startToShootPath;
+        public PathChain pickupRightToGatePath;
+        public PathChain pickupRightToShootPath;
+        public PathChain pickupMiddlePath;
+        public PathChain pickupMiddleToShootPath;
+        public PathChain pickupLeftPath;
+        public PathChain pickupLeftToShootPath;
+        public PathChain autoParkPath;
 
         public Paths(Follower follower) {
-            Path1 = follower.pathBuilder().addPath(
+            startToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(24.453, 126.792),
 
@@ -134,20 +168,21 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line2 = follower.pathBuilder().addPath(
+            pickupRightToGatePath = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(49.736, 84.094),
                                     new Pose(36.736, 82.915),
                                     new Pose(24.491, 87.651),
-                                    new Pose(16.302, 76.075)
+                                    new Pose(25.868, 77.217),
+                                    new Pose(16.302, 74.415)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                     .build();
 
-            Path4 = follower.pathBuilder().addPath(
+            pickupRightToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(16.302, 76.075),
+                                    new Pose(16.302, 74.415),
 
                                     new Pose(49.642, 84.038)
                             )
@@ -155,7 +190,7 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line4 = follower.pathBuilder().addPath(
+            pickupMiddlePath = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(49.642, 84.038),
                                     new Pose(51.575, 56.660),
@@ -165,7 +200,7 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line5 = follower.pathBuilder().addPath(
+            pickupMiddleToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(23.094, 59.925),
 
@@ -175,7 +210,7 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line6 = follower.pathBuilder().addPath(
+            pickupLeftPath = follower.pathBuilder().addPath(
                             new BezierCurve(
                                     new Pose(49.660, 84.226),
                                     new Pose(55.321, 27.226),
@@ -185,7 +220,7 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line7 = follower.pathBuilder().addPath(
+            pickupLeftToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(24.302, 35.472),
 
@@ -195,7 +230,7 @@ public class BlueAuto extends OpMode {
 
                     .build();
 
-            line8 = follower.pathBuilder().addPath(
+            autoParkPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(49.660, 83.925),
 
