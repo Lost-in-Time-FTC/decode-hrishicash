@@ -13,10 +13,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
+import org.firstinspires.ftc.teamcode.robot.config.Config;
 
-@Autonomous(name = "Blue Auto", group = "Autonomous")
+@Autonomous(name = "Blue Goal Auto", group = "Autonomous")
 @Configurable // Panels
-public class BlueAuto extends OpMode {
+public class BlueGoalAuto extends OpMode {
     private Hardware hardware;
     public Follower follower; // Pedro Pathing follower instance
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
@@ -30,7 +31,7 @@ public class BlueAuto extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(24.453, 126.792, Math.toRadians(135)));
+        follower.setStartingPose(Config.initialPoseBlueGoalLaunchZoneAuto);
 
         paths = new Paths(follower); // Build paths
 
@@ -85,6 +86,8 @@ public class BlueAuto extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(paths.pickupRightToShootPath);
                     // TODO: shoot
+                    // turret needs to rotate 51.8 deg CW from this current heading
+                    // approx ~207 deg in servo ref angle?
                     setPathState(3);
                 }
                 break;
@@ -129,7 +132,7 @@ public class BlueAuto extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(paths.pickupLeftToShootPath);
                     // TODO: Shoot
-                    hardware.runOuttake();
+//                    hardware.runOuttake();
                     setPathState(7);
                 }
                 break;
@@ -160,11 +163,11 @@ public class BlueAuto extends OpMode {
         public Paths(Follower follower) {
             startToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    new Pose(24.453, 126.792),
+                                    Config.initialPoseBlueGoalLaunchZoneAuto,
 
                                     new Pose(49.736, 84.094)
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Config.initialPoseBlueGoalLaunchZoneAuto.getHeading(), Math.toRadians(180))
 
                     .build();
 
@@ -183,7 +186,6 @@ public class BlueAuto extends OpMode {
             pickupRightToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(16.302, 74.415),
-
                                     new Pose(49.642, 84.038)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -203,7 +205,6 @@ public class BlueAuto extends OpMode {
             pickupMiddleToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(23.094, 59.925),
-
                                     new Pose(49.660, 84.226)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -223,7 +224,6 @@ public class BlueAuto extends OpMode {
             pickupLeftToShootPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(24.302, 35.472),
-
                                     new Pose(49.660, 83.925)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -233,10 +233,9 @@ public class BlueAuto extends OpMode {
             autoParkPath = follower.pathBuilder().addPath(
                             new BezierLine(
                                     new Pose(49.660, 83.925),
-
-                                    new Pose(49.660, 72.453)
+                                    Config.finalPoseBlueGoalLaunchZoneAuto
                             )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                    ).setLinearHeadingInterpolation(Math.toRadians(180), Config.finalPoseBlueGoalLaunchZoneAuto.getHeading())
 
                     .build();
         }

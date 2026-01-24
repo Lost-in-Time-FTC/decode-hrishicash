@@ -4,6 +4,7 @@ import static androidx.core.math.MathUtils.clamp;
 
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
@@ -14,21 +15,22 @@ public class Outtake {
     private Gamepad gamepad2;
     private double currentVoltage;
     private double pastPos;
+    double turretKp = 0.008;
+    double turretKd = 0.002;
+    double turretKi = 0;
 
+    double integral = 0;
+    double previousError = 0;
+    ElapsedTime timer = new ElapsedTime();
+    double LEFT_LIMIT  = Math.toRadians(340);
+    double LEFT_LIMIT_DEG = 340;
+    double RIGHT_LIMIT = Math.toRadians(-375);
+    double RIGHT_LIMIT_DEG = -375;
+    double TURRET_TO_SERVO_GEAR_RATIO = 166.0 / 42.0;
     public Outtake(Hardware hardware, Telemetry telemetry, Gamepad gamepad2) {
         this.hardware = hardware;
         this.telemetry = telemetry;
         this.gamepad2 = gamepad2;
-    }
-
-    // adjust hood
-    public void pitch() {
-
-    }
-
-    // rotate turret
-    public void yaw() {
-
     }
 
     public void openGate() {
@@ -51,64 +53,81 @@ public class Outtake {
         hardware.runOuttake(0);
     }
 
-    public void track(Pose pose) {
-//        hardware.outtakeRotatorRAxon.setPidCoeffs(0.02, 0.0005, 0.0025);
+    public void track(Pose robotPose, Pose goalPose) {
+        double xPos = robotPose.getX();
+        double yPos = robotPose.getY();
+        double robotHeadingRad = robotPose.getHeading(); // radians from Pedro
 
-        double xPos = pose.getX();
-        double yPos = pose.getY();
-        double robotHeading = pose.getHeading(); //0 heading is towards main QR code; CCW is pos; in rad;
-        // radians from axon servo
-//        double outtakeHeading = hardware.outtakeRotatorREncoder.getVoltage() / 3.3 * 2 * Math.PI - 0.45; // minus offset
+        // convert robot heading to degrees for scaling purposes, necessary due to mechanical quirks
+        double robotHeadingDeg = Math.toDegrees(robotHeadingRad);
 
-        double outtakeHeading = Math.toRadians(hardware.outtakeRotatorRAxon.getTotalRotation());
+        // Turret heading from servo, continuous in degrees
+        double outtakeHeadingDeg = hardware.outtakeRotatorRAxon.getTotalRotation();
+        double turretHeadingDeg = outtakeHeadingDeg * 1/TURRET_TO_SERVO_GEAR_RATIO;
 
-        Pose blueGoalPose = new Pose(50, 84, Math.toRadians(135));
+        // target position
+        double targetAngleRad = Math.atan2(goalPose.getY() - yPos, goalPose.getX() - xPos);
+        double targetAngleDeg = Math.toDegrees(targetAngleRad);
 
-        double dX = blueGoalPose.getX() - xPos;
-        double dY = blueGoalPose.getY() - yPos;
+        // absolute turret angle in field coordinates (degrees)
+        double absLauncherAngleDeg = robotHeadingDeg + turretHeadingDeg;
 
-        double absTargetAngle = Math.atan2(dY, dX);
+        // error in degrees, wrapped to [-180, 180] for shortest rotation
+        double errorDeg = targetAngleDeg - absLauncherAngleDeg;
+        errorDeg = ((errorDeg + 180) % 360 + 360) % 360 - 180; // wrap to [-180, 180]
 
-        double absLauncherAngle = robotHeading + outtakeHeading;
+        double deltaTime = Math.max(timer.seconds(), 0.001); // prevent div by zero
+        double derivative = (errorDeg - previousError) / deltaTime;
+        if (!((outtakeHeadingDeg >= LEFT_LIMIT_DEG && errorDeg > 0) || (outtakeHeadingDeg <= RIGHT_LIMIT_DEG && errorDeg < 0))) {
+            integral += errorDeg * deltaTime;
+        }
 
-        double error = absTargetAngle - absLauncherAngle;
-        error = Math.atan2(Math.sin(error), Math.cos(error)); // normalize to [-pi, pi]
+        double power = turretKp * errorDeg + turretKd * integral + turretKi * derivative;
 
-        double kP = 3;
-        double power = kP * error;
-        if (Math.abs(error) < 0.01) power = 0;
-        hardware.outtakeRotatorRAxon.setPower(power);
-        hardware.outtakeRotatorL.setPower(power);
-//        hardware.rotateOuttake(clamp(power, -1, 1));
-        telemetry.addData("Is this running?", "PLEASE");
+        // limit rotation on turret
+        if (outtakeHeadingDeg >= LEFT_LIMIT_DEG && power > 0) power = 0;
+        if (outtakeHeadingDeg <= RIGHT_LIMIT_DEG && power < 0) power = 0;
+
+        previousError = errorDeg;
+        timer.reset();
+
+        power = clamp(power, -1, 1);
+
+        hardware.rotateOuttake(power);
+
+        telemetry.addData("Outtake Power", power);
+        telemetry.addData("Error (deg)", errorDeg);
+        telemetry.addData("Turret Heading", outtakeHeadingDeg);
+        telemetry.addData("Target Angle", targetAngleDeg);
     }
 
-    public void run(Pose pose) {
+    public void run(Pose robotPose, Pose goalPose) {
         hardware.outtakeRotatorRAxon.update();
-        track(pose);
 
         // YAW
-        if (gamepad2.right_trigger>0.8) {
-            hardware.rotateOuttake(-0.8);
-        } else if (gamepad2.left_trigger>0.8) {
-            hardware.rotateOuttake(0.8);
-        } else {
-            hardware.rotateOuttake(0);
-        }
+//        if (gamepad2.right_trigger>0.8) {
+//            hardware.rotateOuttake(-0.8);
+//        } else if (gamepad2.left_trigger>0.8) {
+//            hardware.rotateOuttake(0.8);
+//        } else {
+//            hardware.rotateOuttake(0);
+//        }
+
+        track(robotPose, goalPose); // CANNOT HAVE THIS WHILE YAW IS UNCOMMENTED
 
         // PITCH (outtake hood)
         if(gamepad2.right_bumper) {
-            hardware.outtakeHood.setPower(0.8);
-            //hardware.outtakeGate.setPosition(-0.8);
+//            hardware.outtakeHood.setPower(0.8);
+            hardware.outtakeHood.setPosition(hardware.outtakeHood.getPosition() - 0.1);
             //hardware.rotateOuttake(0.8);
             telemetry.addData("hood position: ", hardware.outtakeHoodEncoder.getVoltage());
         } else if (gamepad2.left_bumper) {
-            hardware.outtakeHood.setPower(-0.8);
+            hardware.outtakeHood.setPosition(hardware.outtakeHood.getPosition() + 0.1);
             //hardware.outtakeGate.setPosition(1);
             //hardware.rotateOuttake(-0.8);
             telemetry.addData("hood position: ", hardware.outtakeHoodEncoder.getVoltage());
-        }else {
-            hardware.outtakeHood.setPower(0);
+        } else {
+//            hardware.outtakeHood.setPosition(0);
             //hardware.rotateOuttake(0);
         }
 

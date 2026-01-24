@@ -8,13 +8,14 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.robot.config.Config;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Drive;
 import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Intake;
 import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Outtake;
 
-@TeleOp(name = "Tele", group = "Iterative OpMode")
-public class Tele extends OpMode {
+@TeleOp(name = "Blue Goal Tele", group = "Iterative OpMode")
+public class BlueGoalTele extends OpMode {
     private final ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime outtakeTime = new ElapsedTime();//altered with time
     private Hardware hardware;
@@ -24,12 +25,19 @@ public class Tele extends OpMode {
     private Gamepad currentGamepad2;
     private Gamepad previousGamepad2;
     private Follower follower;
-    private boolean alliance = false; // false = blue; true = red;
+
+    public Pose getStartingPose() {
+        return Config.finalPoseBlueGoalLaunchZoneAuto;
+    }
+
+    public Pose getAllianceGoalPose() {
+        return Config.blueGoalPose;
+    }
 
     @Override
     public void init() {
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(0, 0, 0));
+        follower.setStartingPose(getStartingPose());
         follower.update();
 
         currentGamepad2 = new Gamepad();
@@ -41,16 +49,7 @@ public class Tele extends OpMode {
         intake = new Intake(hardware, telemetry, gamepad2);
         outtake = new Outtake(hardware, telemetry, gamepad2);
 
-        if (gamepad1.right_bumper) {
-            alliance = false;
-        }
-
-        if (gamepad1.left_bumper) {
-            alliance = true;
-        }
-
         telemetry.addData("Status", "Initialized");
-        telemetry.addData("Alliance", (alliance) ? "Red" : "Blue");
         telemetry.addData("outtakeRotatorREncoderVoltage", hardware.outtakeRotatorRAxon.getTotalRotation());
         telemetry.update();
     }
@@ -63,12 +62,14 @@ public class Tele extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        Pose pose = follower.getPose();
+        Pose robotPose = follower.getPose();
 
         drive.run();
         intake.run();
-        outtake.run(pose);
-        telemetry.addData("Pose:", pose.getAsVector());
+        outtake.run(robotPose, getAllianceGoalPose());
+        telemetry.addData("Pose X:", robotPose.getX());
+        telemetry.addData("Pose Y:", robotPose.getY());
+        telemetry.addData("Pose Heading (deg):", Math.toDegrees(robotPose.getHeading()));
         hardware.printEncoders(telemetry);
     }
 }

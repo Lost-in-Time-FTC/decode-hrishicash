@@ -32,7 +32,7 @@ public class Hardware {
     public CRServo outtakeRotatorL;
     public AnalogInput outtakeRotatorLEncoder;
     public RTPAxon outtakeRotatorRAxon;
-    public CRServo outtakeHood; // "hood" servo
+    public Servo outtakeHood;
     public AnalogInput outtakeHoodEncoder;
     public DcMotor intakeL;
     public  DcMotor intakeR;
@@ -63,7 +63,7 @@ public class Hardware {
         outtakeRotatorREncoder = hardwareMap.get(AnalogInput.class, "outtakeRotatorREncoder");
         outtakeRotatorRAxon = new RTPAxon(outtakeRotatorR, outtakeRotatorREncoder);
 
-        outtakeHood = hardwareMap.get(CRServo.class, "outtakeLauncher");
+        outtakeHood = hardwareMap.get(Servo.class, "outtakeHood");
         outtakeHoodEncoder = hardwareMap.get(AnalogInput.class, "outtakeLauncherEncoder");
 
         outtakeL = hardwareMap.get(DcMotorEx.class, "outtakeL");
@@ -141,7 +141,8 @@ public class Hardware {
     //NEGATIVE IS INTAKE
 
     public final void rotateOuttake(double power){
-        outtakeRotatorL.setPower(power);
+//        outtakeRotatorL.setPower(power);
+        outtakeRotatorL.setPower(0);
         outtakeRotatorR.setPower(power);
         //MUST TEST - I don't know which direction is which
     }
