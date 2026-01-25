@@ -29,7 +29,7 @@ public class Drive {
         double bL = Range.clip(drive - strafe + turn, -0.5, 0.5);
         double bR = Range.clip(drive + strafe - turn, -0.5, 0.5); //strafe had minus
 
-        double rapidMode = 1.75;
+        double rapidMode = 0.9;
         double sniperMode = 0.25;
 
         // Sniper mode

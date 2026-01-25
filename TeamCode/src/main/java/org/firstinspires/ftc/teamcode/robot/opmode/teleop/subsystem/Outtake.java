@@ -105,15 +105,15 @@ public class Outtake {
         hardware.outtakeRotatorRAxon.update();
 
         // YAW
-//        if (gamepad2.right_trigger>0.8) {
-//            hardware.rotateOuttake(-0.8);
-//        } else if (gamepad2.left_trigger>0.8) {
-//            hardware.rotateOuttake(0.8);
-//        } else {
-//            hardware.rotateOuttake(0);
-//        }
+        if (gamepad2.right_trigger>0.8) {
+            hardware.rotateOuttake(-0.8);
+        } else if (gamepad2.left_trigger>0.8) {
+            hardware.rotateOuttake(0.8);
+        } else {
+            hardware.rotateOuttake(0);
+        }
 
-        track(robotPose, goalPose); // CANNOT HAVE THIS WHILE YAW IS UNCOMMENTED
+//        track(robotPose, goalPose); // CANNOT HAVE THIS WHILE YAW IS UNCOMMENTED
 
         // PITCH (outtake hood)
         if(gamepad2.right_bumper) {
