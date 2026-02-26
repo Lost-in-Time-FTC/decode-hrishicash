@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
+import org.firstinspires.ftc.teamcode.robot.config.PID;
 
 public class Outtake {
     private Hardware hardware;
@@ -15,22 +16,38 @@ public class Outtake {
     private Gamepad gamepad2;
     private double currentVoltage;
     private double pastPos;
-    double turretKp = 0.008;
+    double turretKp = 0.008; // v4.2 - High gain for small error detection
+    double turretKi = 0.0; // v4.2 - Stronger integral to overcome friction stall
     double turretKd = 0.002;
-    double turretKi = 0;
+    double turretMinPower = 0.08; // v4.2 - Minimum power to overcome servo deadzone
 
-    double integral = 0;
+    // Tracking variables for live movement detection
+    private double lastX = 0, lastY = 0, lastH = 0;
+    private long lastMoveTime = 0;
+
+    // Flywheel PID constants
+    double flywheelKp = 0.005;
+    double flywheelKi = 0.0;
+    double flywheelKd = 0.0;
+    double flywheelKf = 0.00038; // Baseline power to maintain velocity
+
+    private PID flywheelPID;
+
     double previousError = 0;
     ElapsedTime timer = new ElapsedTime();
     double LEFT_LIMIT  = Math.toRadians(340);
     double LEFT_LIMIT_DEG = 340;
     double RIGHT_LIMIT = Math.toRadians(-375);
     double RIGHT_LIMIT_DEG = -375;
-    double TURRET_TO_SERVO_GEAR_RATIO = 166.0 / 42.0;
+    double TURRET_TO_SERVO_GEAR_RATIO = 166.0 / 43.0;
     public Outtake(Hardware hardware, Telemetry telemetry, Gamepad gamepad2) {
         this.hardware = hardware;
         this.telemetry = telemetry;
         this.gamepad2 = gamepad2;
+        this.flywheelPID = new PID(flywheelKp, flywheelKi, flywheelKd, flywheelKf);
+
+        // Disable internal PID in RTPAxon to let goal tracking take control
+        this.hardware.outtakeRotatorRAxon.setRtp(false);
     }
 
     public void openGate() {
@@ -41,8 +58,18 @@ public class Outtake {
         hardware.outtakeGate.setPosition(-0.8);
     }
 
-    public void launch(int rpm) {
-        hardware.runOuttake(rpm);
+    public void launch(int targetRPM) {
+        double currentVelocity = hardware.outtakeL.getVelocity(); // Assuming this returns ticks/sec or similar
+        // Convert target RPM to ticks/sec if Hardware.runOuttake logic is desired here
+        // Or handle the conversion within the PID or Hardware class.
+        // For now, let's stick to the requested structure:
+        double power = flywheelPID.out(targetRPM, currentVelocity);
+        power = Math.min(1.0, Math.max(-1.0, power)); // Clamp power between -1 and 1
+        hardware.outtakeL.setPower(power);
+        hardware.outtakeR.setPower(-power);
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Current Velocity", currentVelocity);
+        telemetry.addData("Outtake Power", power);
     }
 
     public void launch() {
@@ -63,14 +90,20 @@ public class Outtake {
 
         // Turret heading from servo, continuous in degrees
         double outtakeHeadingDeg = hardware.outtakeRotatorRAxon.getTotalRotation();
-        double turretHeadingDeg = outtakeHeadingDeg * 1/TURRET_TO_SERVO_GEAR_RATIO;
+
+        // CALCULATE BOTH RATIOS TO FIND THE ERROR
+        double turretHeadingIfEncoderOnServo = outtakeHeadingDeg * (43.0 / 166.0);
+        double turretHeadingIfEncoderOnTurret = outtakeHeadingDeg; // 1:1
+
+        // USERS: Swap this variable if your tracking is "Distance Inaccurate"
+        double finalTurretHeading = turretHeadingIfEncoderOnServo;
 
         // target position
         double targetAngleRad = Math.atan2(goalPose.getY() - yPos, goalPose.getX() - xPos);
         double targetAngleDeg = Math.toDegrees(targetAngleRad);
 
         // absolute turret angle in field coordinates (degrees)
-        double absLauncherAngleDeg = robotHeadingDeg + turretHeadingDeg;
+        double absLauncherAngleDeg = robotHeadingDeg + finalTurretHeading;
 
         // error in degrees, wrapped to [-180, 180] for shortest rotation
         double errorDeg = targetAngleDeg - absLauncherAngleDeg;
@@ -78,42 +111,72 @@ public class Outtake {
 
         double deltaTime = Math.max(timer.seconds(), 0.001); // prevent div by zero
         double derivative = (errorDeg - previousError) / deltaTime;
-        if (!((outtakeHeadingDeg >= LEFT_LIMIT_DEG && errorDeg > 0) || (outtakeHeadingDeg <= RIGHT_LIMIT_DEG && errorDeg < 0))) {
-            integral += errorDeg * deltaTime;
+
+        // PD formula
+        double power = (turretKp * errorDeg) + (turretKd * derivative);
+
+        // Friction Compensation
+        if (Math.abs(errorDeg) > 0.4) { // 0.4 deg deadzone for stability
+            power += Math.signum(errorDeg) * turretMinPower;
+        } else {
+            power = 0;
         }
 
-        double power = turretKp * errorDeg + turretKd * integral + turretKi * derivative;
+        // --- MISSION CRITICAL DIAGNOSTICS (V12.0) ---
+        long now = System.currentTimeMillis();
+        boolean posMoving = (Math.abs(xPos - lastX) > 0.01 || Math.abs(yPos - lastY) > 0.01 || Math.abs(robotHeadingDeg - lastH) > 0.01);
+        if (posMoving) lastMoveTime = now;
+        boolean isOdomAlive = (now - lastMoveTime < 500); // Moved in the last 0.5 seconds
 
-        // limit rotation on turret
-        if (outtakeHeadingDeg >= LEFT_LIMIT_DEG && power > 0) power = 0;
-        if (outtakeHeadingDeg <= RIGHT_LIMIT_DEG && power < 0) power = 0;
+        double rawVolts = hardware.outtakeRotatorREncoder.getVoltage();
+        boolean isEncoderAlive = (rawVolts > 0.1 && rawVolts < 3.2); // Typical Axon sensor range
+
+        telemetry.addData("V12_1_ODOM_ALIVE?", isOdomAlive ? "YES" : "!! NO (MOVE ROBOT) !!");
+        telemetry.addData("V12_2_ENC_ALIVE?", isEncoderAlive ? "YES" : "!! NO (CHECK WIRE) !!");
+        telemetry.addData("V12_3_ENC_VOLTS", String.format("%.3fV", rawVolts));
+        telemetry.addData("V12_4_ERROR_DEG", String.format("%.1f", errorDeg));
+        telemetry.addData("V12_5_CALIBRATION", "Move Turret LEFT manually -> Target V12_6 should INCREASE");
+        telemetry.addData("V12_6_TURRET_DEG", String.format("%.1f", finalTurretHeading));
+        telemetry.addData("V12_7_PWR_SIGN", String.format("%.2f", power));
+
+        lastX = xPos; lastY = yPos; lastH = robotHeadingDeg;
+        pastPos = outtakeHeadingDeg;
 
         previousError = errorDeg;
         timer.reset();
 
         power = clamp(power, -1, 1);
 
+        // --- POLARITY CORRECTION ---
+        // If the turret moves AWAY from the goal, change the sign of 'power' below
         hardware.rotateOuttake(power);
-
-        telemetry.addData("Outtake Power", power);
-        telemetry.addData("Error (deg)", errorDeg);
-        telemetry.addData("Turret Heading", outtakeHeadingDeg);
-        telemetry.addData("Target Angle", targetAngleDeg);
     }
 
     public void run(Pose robotPose, Pose goalPose) {
         hardware.outtakeRotatorRAxon.update();
 
         // YAW
-        if (gamepad2.right_trigger>0.8) {
-            hardware.rotateOuttake(-0.8);
-        } else if (gamepad2.left_trigger>0.8) {
-            hardware.rotateOuttake(0.8);
-        } else {
-            hardware.rotateOuttake(0);
-        }
+//        if (gamepad2.right_trigger>0.8) {
+//            hardware.rotateOuttake(-0.8);
+//        } else if (gamepad2.left_trigger>0.8) {
+//            hardware.rotateOuttake(0.8);
+//        } else {
+//            hardware.rotateOuttake(0);
+//      }
 
-//        track(robotPose, goalPose); // CANNOT HAVE THIS WHILE YAW IS UNCOMMENTED
+        // --- V12 MANUAL POLARITY TEST ---
+        if (gamepad2.dpad_left) {
+            hardware.rotateOuttake(0.4); // Should turn LEFT (CCW)
+            telemetry.addData("V12_TEST", "Pulsing LEFT (CCW)");
+        } else if (gamepad2.dpad_right) {
+            hardware.rotateOuttake(-0.4); // Should turn RIGHT (CW)
+            telemetry.addData("V12_TEST", "Pulsing RIGHT (CW)");
+        } else if (gamepad2.right_trigger > 0.5) {
+            hardware.rotateOuttake(0.4);
+            telemetry.addData("!! MANUAL OVERRIDE !!", "Rotating at 0.4 power");
+        } else {
+            track(robotPose, goalPose);
+        }
 
         // PITCH (outtake hood)
         if(gamepad2.right_bumper) {
@@ -132,20 +195,42 @@ public class Outtake {
         }
 
         // OPEN GATE
-        if (gamepad2.dpad_down) {
-            openGate();
-        } else {
-            closeGate();
-        }
-
+        //if (gamepad2.dpad_down) {
+        //openGate();
+        // } else {
+        //     closeGate();
+        // }
+        // MANUAL TURRET RESET
+        // Press B to re-center the turret's encoder software if it gets lost
+//        if (gamepad2.b) {
+//            hardware.outtakeRotatorRAxon.forceResetTotalRotation();
+//            integral = 0;
+//            previousError = 0;
+//        }
         // LAUNCH
+        double distance = Math.hypot(goalPose.getX() - robotPose.getX(), goalPose.getY() - robotPose.getY());
+        int dynamicRPM = getTargetRPM(distance);
+
         if (gamepad2.y) {
-            launch(2200);
+            launch(dynamicRPM);
         } else if (gamepad2.x) {
-           launch();
+            launch();
         } else {
             stop();
         }
+
+        telemetry.addData("Distance to Goal", distance);
+        telemetry.addData("Dynamic Target RPM", dynamicRPM);
+    }
+
+    private int getTargetRPM(double distance) {
+        // Linear interpolation or a lookup table can be used here.
+        // Formula: RPM = (slope * distance) + intercept
+        // This needs to be tuned based on your physical testing!
+        double slope = 15.0; // Example: increase 10 RPM per inch
+        double intercept = 300.0; // Example: 1200 RPM at 0 distance
+
+        return (int) (slope * distance + intercept);
     }
 
     /*public ElapsedTime run(ElapsedTime readyTime) {//altered with time

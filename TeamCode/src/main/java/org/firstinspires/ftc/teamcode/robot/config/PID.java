@@ -10,7 +10,7 @@ public class PID {
     private double previousError = 0;
     ElapsedTime timer = new ElapsedTime();
 
-    public PID(double Kp, double Ki, double Kd) {
+    public PID(double Kp, double Ki, double Kd, double flywheelKf) {
         this.Kp = Kp;
         this.Ki = Ki;
         this.Kd = Kd;
