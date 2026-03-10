@@ -16,6 +16,6 @@ public class Config {
     public static final Pose initialPoseRedHumanPlayerLaunchZone = new Pose(); // TODO: update pose
 
     // goals
-    public static final Pose blueGoalPose = new Pose(12, 132);
+    public static final Pose blueGoalPose = new Pose(132, 12);
     public static final Pose redGoalPose = new Pose(132, 132);
 }

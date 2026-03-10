@@ -46,8 +46,8 @@ public class BlueGoalTele extends OpMode {
         hardware = new Hardware(hardwareMap);
 
         drive = new Drive(hardware, telemetry, gamepad1);
-        intake = new Intake(hardware, telemetry, gamepad2);
-        outtake = new Outtake(hardware, telemetry, gamepad2);
+        intake = new Intake(hardware, telemetry, gamepad1);
+        outtake = new Outtake(hardware, telemetry, gamepad1);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("outtakeRotatorREncoderVoltage", hardware.outtakeRotatorRAxon.getTotalRotation());

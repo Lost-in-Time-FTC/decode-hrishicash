@@ -19,18 +19,18 @@ public class Drive {
 
     public void run() {
         // Mecanum
-        double drive = gamepad1.left_stick_y;
-        double turn = -gamepad1.right_stick_x; //added neg
-        double strafe = -gamepad1.left_stick_x; //added neg
+        double drive = -gamepad1.left_stick_y; // Inverted Y-axis
+        double turn = gamepad1.right_stick_x; //added neg
+        double strafe = gamepad1.left_stick_x; //added neg
 
         // Strafing
-        double fL = Range.clip(drive + strafe + turn, -0.5, 0.5);
-        double fR = Range.clip(drive - strafe - turn, -0.5, 0.5); //strafe had plus
-        double bL = Range.clip(drive - strafe + turn, -0.5, 0.5);
-        double bR = Range.clip(drive + strafe - turn, -0.5, 0.5); //strafe had minus
+        double fL = Range.clip(drive + strafe + turn, -.85, .85);
+        double fR = Range.clip(drive - strafe - turn, -.85, .85); //strafe had plus
+        double bL = Range.clip(drive - strafe + turn, -.85, .85);
+        double bR = Range.clip(drive + strafe - turn, -.85, .85); //strafe had minus
 
         double rapidMode = 0.9;
-        double sniperMode = 0.25;
+        double sniperMode = 0.5;
 
         // Sniper mode
         if (gamepad1.left_trigger > 0) {

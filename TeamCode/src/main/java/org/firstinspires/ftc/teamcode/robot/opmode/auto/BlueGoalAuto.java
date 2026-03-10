@@ -10,10 +10,13 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 import org.firstinspires.ftc.teamcode.robot.config.Config;
+import org.firstinspires.ftc.teamcode.robot.opmode.teleop.subsystem.Outtake;
 
 @Autonomous(name = "Blue Goal Auto", group = "Autonomous")
 @Configurable // Panels
@@ -23,6 +26,9 @@ public class BlueGoalAuto extends OpMode {
     private TelemetryManager panelsTelemetry; // Panels Telemetry instance
     private int pathState; // Current autonomous path state (state machine)
     private Paths paths; // Paths defined in the Paths class
+    private Outtake outtake;
+    private int shootState = 0;
+    private ElapsedTime outtakeTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -32,9 +38,15 @@ public class BlueGoalAuto extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(Config.initialPoseBlueGoalLaunchZoneAuto);
+        
+        // Slow down the robot for testing
+        follower.setMaxPower(0.5); // 50% power max
 
         paths = new Paths(follower); // Build paths
 
+        // Use the OpMode's default gamepad1 (even if physical one isn't connected yet)
+        outtake = new Outtake(hardware, telemetry, gamepad1);
+        
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
     }
@@ -42,6 +54,10 @@ public class BlueGoalAuto extends OpMode {
     @Override
     public void loop() {
         follower.update(); // Update Pedro Pathing
+        
+        // Continuously track target while following path or standing still
+        outtake.track(follower.getPose(), Config.blueGoalPose);
+        
         autonomousPathUpdate(); // Update autonomous state machine
 
         // Log values to Panels and Driver Station
@@ -61,6 +77,44 @@ public class BlueGoalAuto extends OpMode {
         pathState = pState;
     }
 
+    public boolean executeAutoShoot() {
+        double distance = Math.hypot(Config.blueGoalPose.getX() - follower.getPose().getX(), Config.blueGoalPose.getY() - follower.getPose().getY());
+        int dynamicRPM = outtake.getTargetRPM(distance);
+
+        if (shootState == 0) {
+            outtake.launch(dynamicRPM);
+            double currentVel = Math.abs(hardware.outtakeL.getVelocity());
+            if (currentVel > dynamicRPM - 500) {
+                outtake.openGate();
+                hardware.intakeL.setPower(-1);
+                hardware.intakeR.setPower(-1);
+                
+                outtakeTimer.reset();
+                shootState = 1;
+            } else {
+                outtake.closeGate();
+                hardware.intakeL.setPower(0);
+                hardware.intakeR.setPower(0);
+            }
+            return false;
+        } else if (shootState == 1) {
+            outtake.launch(dynamicRPM);
+            hardware.intakeL.setPower(-1);
+            hardware.intakeR.setPower(-1);
+            
+            if (outtakeTimer.seconds() > 0.5) {
+                outtake.stop();
+                outtake.closeGate();
+                hardware.intakeL.setPower(0);
+                hardware.intakeR.setPower(0);
+                shootState = 0;
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -69,77 +123,52 @@ public class BlueGoalAuto extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    // run intake
-                    hardware.intakeL.setPower(-1);
-                    hardware.intakeR.setPower(-1);
-
-                    follower.followPath(paths.pickupRightToGatePath);
-
-                    // stop intake
-                    hardware.intakeL.setPower(0);
-                    hardware.intakeR.setPower(0);
-
-                    setPathState(2);
+                    if (executeAutoShoot()) {
+                        follower.followPath(paths.pickupRightToGatePath);
+                        setPathState(2);
+                    }
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
                     follower.followPath(paths.pickupRightToShootPath);
-                    // TODO: shoot
-                    // turret needs to rotate 51.8 deg CW from this current heading
-                    // approx ~207 deg in servo ref angle?
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    // run intake
-                    hardware.intakeL.setPower(-1);
-                    hardware.intakeR.setPower(-1);
-
-                    follower.followPath(paths.pickupMiddlePath);
-
-                    // stop intake
-                    hardware.intakeL.setPower(0);
-                    hardware.intakeR.setPower(0);
-
-                    setPathState(4);
+                    if (executeAutoShoot()) {
+                        follower.followPath(paths.pickupMiddlePath);
+                        setPathState(4);
+                    }
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
                     follower.followPath(paths.pickupMiddleToShootPath);
-                    // TODO: shoot
                     setPathState(5);
                 }
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    // run intake
-                    hardware.intakeL.setPower(-1);
-                    hardware.intakeR.setPower(-1);
-
-                    follower.followPath(paths.pickupLeftPath);
-
-                    // stop intake
-                    hardware.intakeL.setPower(0);
-                    hardware.intakeR.setPower(0);
-
-                    setPathState(6);
+                    if (executeAutoShoot()) {
+                        follower.followPath(paths.pickupLeftPath);
+                        setPathState(6);
+                    }
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
                     follower.followPath(paths.pickupLeftToShootPath);
-                    // TODO: Shoot
-//                    hardware.runOuttake();
                     setPathState(7);
                 }
                 break;
             case 7:
                 if (!follower.isBusy()) {
-                    follower.followPath(paths.autoParkPath);
-                    setPathState(8);
+                    if (executeAutoShoot()) {
+                        follower.followPath(paths.autoParkPath);
+                        setPathState(8);
+                    }
                 }
                 break;
             case 8:

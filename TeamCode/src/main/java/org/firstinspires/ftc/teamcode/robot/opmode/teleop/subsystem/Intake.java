@@ -12,25 +12,26 @@ import org.firstinspires.ftc.teamcode.robot.config.Hardware;
 public class Intake {
     private Hardware hardware;
     private Telemetry telemetry;
-    private Gamepad gamepad2;
+    private Gamepad gamepad1;
     private boolean intakeToggle = false;
     private boolean intakingIn = true;
 
-    public Intake(Hardware hardware, Telemetry telemetry, Gamepad gamepad2) {
+    public Intake(Hardware hardware, Telemetry telemetry, Gamepad gamepad1) {
         this.hardware = hardware;
         this.telemetry = telemetry;
-        this.gamepad2 = gamepad2;
+        this.gamepad1 = gamepad1;
     }
     public void run() { //kushal wants just one controller
-        if(gamepad2.a) {
+        if(gamepad1.a) {
             hardware.intakeL.setPower(-1);
             hardware.intakeR.setPower(-1);
         }
-        else if(gamepad2.b) {
+        else if(gamepad1.b) {
             hardware.intakeL.setPower(1);
             hardware.intakeR.setPower(1);
         }
-        else {
+        else if (!gamepad1.x && !gamepad1.y) {
+            // Only stop the intake if the outtake auto-feed isn't using it
             hardware.intakeL.setPower(0);
             hardware.intakeR.setPower(0);
         }

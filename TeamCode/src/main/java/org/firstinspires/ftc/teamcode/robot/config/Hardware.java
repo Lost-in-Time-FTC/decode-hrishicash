@@ -141,8 +141,7 @@ public class Hardware {
     //NEGATIVE IS INTAKE
 
     public final void rotateOuttake(double power){
-//        outtakeRotatorL.setPower(power);
-        outtakeRotatorL.setPower(0);
+        outtakeRotatorL.setPower(power);
         outtakeRotatorR.setPower(power);
         //MUST TEST - I don't know which direction is which
     }
